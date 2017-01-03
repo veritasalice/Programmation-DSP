@@ -1,4 +1,12 @@
 ---------------------------  exercice3.pjt - Debug  ---------------------------
+[dsk6713_codec_devParams.c] "c:\applis\ccstudio_v2\c6000\cgtools\bin\cl6x" -g -q -eoo67 -fr"E:/Electif DSP/Exercice1/Debug" -i"." -i"E:/Electif DSP/Exercice1/../../../include" -i"c:/applis/ti/c6700/dsplib/include" -d"CHIP_6713" -mv6700 -@"Debug.lkf" "dsk6713_codec_devParams.c"
+
+[echo.c] "c:\applis\ccstudio_v2\c6000\cgtools\bin\cl6x" -g -q -eoo67 -fr"E:/Electif DSP/Exercice1/Debug" -i"." -i"E:/Electif DSP/Exercice1/../../../include" -i"c:/applis/ti/c6700/dsplib/include" -d"CHIP_6713" -mv6700 -@"Debug.lkf" "echo.c"
+
+[exercice3cfg.s62] "c:\applis\ccstudio_v2\c6000\cgtools\bin\cl6x" -g -q -eoo67 -fr"E:/Electif DSP/Exercice1/Debug" -i"." -i"E:/Electif DSP/Exercice1/../../../include" -i"c:/applis/ti/c6700/dsplib/include" -d"CHIP_6713" -mv6700 -@"Debug.lkf" "exercice3cfg.s62"
+
+[exercice3cfg_c.c] "c:\applis\ccstudio_v2\c6000\cgtools\bin\cl6x" -g -q -eoo67 -fr"E:/Electif DSP/Exercice1/Debug" -i"." -i"E:/Electif DSP/Exercice1/../../../include" -i"c:/applis/ti/c6700/dsplib/include" -d"CHIP_6713" -mv6700 -@"Debug.lkf" "exercice3cfg_c.c"
+
 [Linking...] "c:\applis\ccstudio_v2\c6000\cgtools\bin\cl6x" -@"Debug.lkf"
 
 Build Complete,

@@ -10,20 +10,20 @@
 
 menuitem "Sliders"
 
-slider Graves(0, 10 ,1, 1, gainParm)
+slider Lambda(0, 10 ,1, 1, gainParm)
 {
-    gain_graves = gainParm;
+    curseur_lambda = gainParm;
 }
 
 
-slider Aigus(0, 10,1, 1, gainParm)
+slider Alpha(0, 10,1, 1, gainParm)
 {
-    gain_aigus = gainParm;
+    curseur_alpha = gainParm;
 }
 
 
-slider Mediums(0, 10 ,1, 1, gainParm)
+slider Retard(0, 5 ,1, 1, gainParm)
 {
-    gain_mediums = gainParm;
+    curseur_retard = gainParm;
 }
 

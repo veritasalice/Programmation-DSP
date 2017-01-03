@@ -56,23 +56,17 @@ extern SWI_Obj swiEcho;
 #endif
 
 #define LNGBUF 128  // longueur des buffers
+#define FE 44100
 /*
  *  'pioRx' and 'pioTx' objects will be initialized by PIO_new(). 
  */
 PIO_Obj pioRx, pioTx;
 
-float BufIn[LNGBUF+4]; // buffer pour les entrées, 4 cases en plus pour stocker les valeurs précédentes
-float BufGraves[LNGBUF+4]; // buffer pour la sortie filtre graves, 4 cases en plus pour stocker les valeurs précédentes
-float BufAigus[LNGBUF+4]; // buffer pour la sortie filtre aigus, 4 cases en plus pour stocker les valeurs précédentes
-float BufOut[LNGBUF+4]; // buffer pour la sortie filtre médiums, 4 cases en plus pour stocker les valeurs précédentes
-float Fe; // Fréquence d'échantillonage
-int prev_curseur_graves, prev_curseur_aigus, prev_curseur_mediums; // Valeurs des curseurs à l'instant précédent
-float c,d,e,w0_graves; // Constantes filtre fréquences graves
-float f,g,h,w0_aigus; // Constantes filtre fréquences aigus
-float k,m,n,q,p,w0_mediums,alpha,q1,q2; // Constantes filtre fréquences médiums
-int gain_graves = 5;
-int gain_aigus = 5;
-int gain_mediums = 5;
+far float BufIn[LNGBUF+FE]; // buffer pour les entrées
+far float BufOut[LNGBUF+FE]; // buffer pour la sortie
+int curseur_lambda = 0;
+int curseur_alpha = 0;
+int curseur_retard = 0;
 
 /*
  *  ======== main ========
@@ -83,15 +77,6 @@ int gain_mediums = 5;
 main()
 {
 	int j;
-	Fe = 44100.0;
-	alpha = 0.1;
-	w0_graves = 2*3.14*400.0/Fe; // Fréquence coupure filtre graves
-	w0_aigus = 2*3.14*2500.0/Fe; // Fréquence coupure filtre aigus
-	w0_mediums = 2*3.14*1000.0/Fe; // Fréquence coupure filtre aigus
-	
-	prev_curseur_graves = 0;
-	prev_curseur_aigus = 0;
-	prev_curseur_mediums = 0;
 	
     /*
      * Initialize PIO module
@@ -115,12 +100,10 @@ main()
 
     LOG_printf(&trace, "pip_audio started");
 	
-	for (j = 0; j < 4; j++) // initialisation à 0 des 4 premières cases des buffers
+	for (j = 0; j < FE; j++)
 	{
     	BufIn[j] = 0;
-		BufGraves[j] = 0;
-		BufAigus[j] = 0;
-		BufOut[j] = 0;
+    	BufOut[j] = 0;
     }
 }
 
@@ -138,7 +121,6 @@ Void echo(Void)
 {
     int i, size;
     short *src, *dst;
-	float temp; // variable de stockage temporaire
 
     /*
      * Check that the precondions are met, that is pipRx has a buffer of
@@ -167,67 +149,27 @@ Void echo(Void)
 	// -----------------------------------------
     // copie l'entrée vers le buffer d'entrée
     // -----------------------------------------
-    for (i = 4; i < size+4; i++)
+    for (i = FE; i < size+FE; i++)
 	{
 		BufIn[i] = (float)*src++ / 32768.0; // normalisation du signal entre -1 et +1
     }     
-
-	// -----------------------------------------
-    // calcul coefficients des filtres si les curseurs ont été modifiés
-    // -----------------------------------------
-	if (gain_graves != prev_curseur_graves)
-	{
-		temp = sqrt(pow(10.0, ((float)gain_graves-5.0)/5.0)); // on calcule la racine carré du gain une seule fois
-		c = (2+w0_graves*temp)/(2+w0_graves/temp);
-		d = (-2+w0_graves*temp)/(2+w0_graves/temp);
-		e = (-2+w0_graves/temp)/(2+w0_graves/temp);
-		prev_curseur_graves = gain_graves;
-	}
-     
-    if (gain_aigus != prev_curseur_aigus)
-	{	
-		temp = sqrt(pow(10.0, ((float)gain_aigus-5.0)/5.0)); // on calcule la racine carré du gain une seule fois
-		f = (-2*temp+w0_aigus)/(w0_aigus + 2/temp);
-		g = (w0_aigus - 2/temp)/(w0_aigus + 2/temp);
-		h = (w0_aigus + 2*temp)/(w0_aigus + 2/temp);
-		prev_curseur_aigus = gain_aigus;
-    }
-     
-    if (gain_mediums != prev_curseur_mediums)
-	{
-		temp = sqrt(pow(10.0, ((float)gain_mediums-5.0)/5.0)); // on calcule la racine carré du gain une seule fois
-		q2 = alpha*temp/(1-alpha*alpha);
-		q1 = q2
-		+/pow(10.0, ((float)gain_mediums-5.0)/5.0);
-		k = 4 + w0_mediums*w0_mediums + 2*w0_mediums/q1;
-		m = 2*w0_mediums*w0_mediums-8;
-		n = 4 + w0_mediums*w0_mediums - 2*w0_mediums/q1;
-		q = 4 + w0_mediums*w0_mediums - 2*w0_mediums/q2;
-		p = 4 + w0_mediums*w0_mediums + 2*w0_mediums/q2;
-		prev_curseur_mediums = gain_mediums;
-    }
 	
 	// ------------------------------------------
 	// Filtrage
 	// ------------------------------------------
-	for (i = 4; i < size+4; i++)
+	for (i = FE; i < size+FE; i++)
 	{
-		BufGraves[i] = BufIn[i]*c + BufIn[i-2]*d - BufGraves[i-2]*e; // calcul de la sortie du filtre pour les graves
-		BufAigus[i] = BufGraves[i]*h + BufGraves[i-2]*f - BufAigus[i-2]*g; // calcul de la sortie du filtre pour les aigus
-		BufOut[i] = (-m*BufOut[i-2] - q*BufOut[i-4] + k*BufAigus[i] + m*BufAigus[i-2] + n*BufAigus[i-4])/p; // calcul de la sortie du filtre pour les mediums
+		BufOut[i] = (1-(float)curseur_alpha/10.0)*BufIn[i] + ((float)curseur_lambda - curseur_lambda*((float)curseur_alpha/10.0) + curseur_alpha/10.0)*BufIn[i-(int)(2*FE*curseur_retard*0.1)] - curseur_lambda*BufOut[i-(int)(2*FE*curseur_retard*0.1)]; // calcul de la sortie du filtre
 	}
 
-	//on copie les 4 dernières cases des buffers d'entrée au début de ceux-ci pour la prochaine itération
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < FE; i++)
 	{
 		BufIn[i] = BufIn[size+i];
-		BufGraves[i] = BufGraves[size+i];
-		BufAigus[i] = BufAigus[size+i];
 		BufOut[i] = BufOut[size+i];
 	}
 	
     // copie le buffer de sortie vers la sortie
-    for (i = 4; i < size+4; i++)
+    for (i = FE; i < size+FE; i++)
 	{
 		*dst++ = BufOut[i] *32768.0 ; // reconversion du signal en entier
     }     

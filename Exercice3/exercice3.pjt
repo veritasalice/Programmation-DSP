@@ -1,0 +1,31 @@
+; Code Composer Project File, Version 2.0 (do not modify or remove this line)
+
+[Project Settings]
+ProjectName="pip_audio"
+ProjectDir="C:\Partage\Module2A V3.0\Exercice3\"
+ProjectType=Executable
+CPUFamily=TMS320C67XX
+Tool="Compiler"
+Tool="DspBiosBuilder"
+Tool="Linker"
+Config="Debug"
+
+[Source Files]
+Source="dsk6713_codec_devParams.c"
+Source="echo.c"
+Source="exercice3.cdb"
+Source="exercice3.cmd"
+
+[Generated Files]
+Source="exercice3cfg.s62"
+Source="exercice3cfg_c.c"
+
+["Compiler" Settings: "Debug"]
+Options=-g -q -eoo67 -fr"$(Proj_dir)\Debug" -i"." -i"$(Proj_dir)\..\..\..\include" -i"c:\applis\ti\c6700\dsplib\include" -d"CHIP_6713" -mv6700
+
+["DspBiosBuilder" Settings: "Debug"]
+Options=-v67
+
+["Linker" Settings: "Debug"]
+Options=-q -c -o"$(Proj_dir)\Debug\exercice3.out" -x -i"$(Proj_dir)\..\..\..\lib"
+
