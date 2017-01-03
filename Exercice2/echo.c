@@ -67,9 +67,9 @@ float BufAigus[LNGBUF+4]; // buffer pour la sortie filtre aigus, 4 cases en plus
 float BufOut[LNGBUF+4]; // buffer pour la sortie filtre médiums, 4 cases en plus pour stocker les valeurs précédentes
 float Fe; // Fréquence d'échantillonage
 int prev_curseur_graves, prev_curseur_aigus, prev_curseur_mediums; // Valeurs des curseurs à l'instant précédent
-float c,d,e,w0_graves; // Constantes filtre fréquences graves
-float f,g,h,w0_aigus; // Constantes filtre fréquences aigus
-float k,m,n,q,p,w0_mediums,alpha,q1,q2; // Constantes filtre fréquences médiums
+float c, d, e, w0_graves; // Constantes filtre fréquences graves
+float f, g, h, w0_aigus; // Constantes filtre fréquences aigus
+float k, m, n, q, p, w0_mediums, alpha, q1, q2; // Constantes filtre fréquences médiums
 int gain_graves = 5;
 int gain_aigus = 5;
 int gain_mediums = 5;
@@ -167,7 +167,7 @@ Void echo(Void)
 	// -----------------------------------------
     // copie l'entrée vers le buffer d'entrée
     // -----------------------------------------
-    for (i = 4; i < size+4; i++)
+    for (i = 4; i < size + 4; i++)
 	{
 		BufIn[i] = (float)*src++ / 32768.0; // normalisation du signal entre -1 et +1
     }     
@@ -197,8 +197,7 @@ Void echo(Void)
 	{
 		temp = sqrt(pow(10.0, ((float)gain_mediums-5.0)/5.0)); // on calcule la racine carré du gain une seule fois
 		q2 = alpha*temp/(1-alpha*alpha);
-		q1 = q2
-		+/pow(10.0, ((float)gain_mediums-5.0)/5.0);
+		q1 = q2/pow(10.0, ((float)gain_mediums-5.0)/5.0);
 		k = 4 + w0_mediums*w0_mediums + 2*w0_mediums/q1;
 		m = 2*w0_mediums*w0_mediums-8;
 		n = 4 + w0_mediums*w0_mediums - 2*w0_mediums/q1;
@@ -210,7 +209,7 @@ Void echo(Void)
 	// ------------------------------------------
 	// Filtrage
 	// ------------------------------------------
-	for (i = 4; i < size+4; i++)
+	for (i = 4; i < size + 4; i++)
 	{
 		BufGraves[i] = BufIn[i]*c + BufIn[i-2]*d - BufGraves[i-2]*e; // calcul de la sortie du filtre pour les graves
 		BufAigus[i] = BufGraves[i]*h + BufGraves[i-2]*f - BufAigus[i-2]*g; // calcul de la sortie du filtre pour les aigus
@@ -227,7 +226,7 @@ Void echo(Void)
 	}
 	
     // copie le buffer de sortie vers la sortie
-    for (i = 4; i < size+4; i++)
+    for (i = 4; i < size + 4; i++)
 	{
 		*dst++ = BufOut[i] *32768.0 ; // reconversion du signal en entier
     }     

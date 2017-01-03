@@ -121,11 +121,13 @@ Void echo(Void)
      * Check that the precondions are met, that is pipRx has a buffer of
      * data and pipTx has a free buffer.
      */
-    if (PIP_getReaderNumFrames(&pipRx) <= 0) {
+    if (PIP_getReaderNumFrames(&pipRx) <= 0)
+	{
         LOG_error("echo: No reader frame!", 0);
         return;
     }
-    if (PIP_getWriterNumFrames(&pipTx) <= 0) {
+    if (PIP_getWriterNumFrames(&pipTx) <= 0)
+	{
         LOG_error("echo: No writer frame!", 0);
         return;
     }
@@ -179,4 +181,3 @@ Void echo(Void)
     PIP_put(&pipTx);
     PIP_free(&pipRx);
 }
-
