@@ -1,0 +1,6 @@
+-z -q -c -o"C:/Documents and Settings/utilisateur/Mes documents/projet/Exercice3/Debug/exercice3.out" -x -i"C:/Documents and Settings/utilisateur/Mes documents/projet/Exercice3/../../../lib" -i"c:/applis/ccstudio_v2/c6000/bios/lib" -i"c:/applis/ccstudio_v2/C6000/dsk6713/lib" -i"c:/applis/ccstudio_v2/c6000/rtdx/lib" -i"c:/applis/ccstudio_v2/c6000/cgtools/lib"
+"C:\Documents and Settings\utilisateur\Mes documents\projet\Exercice3\Debug\dsk6713_codec_devParams.o67"
+"C:\Documents and Settings\utilisateur\Mes documents\projet\Exercice3\Debug\echo.o67"
+"C:\Documents and Settings\utilisateur\Mes documents\projet\Exercice3\Debug\exercice3cfg.o67"
+"C:\Documents and Settings\utilisateur\Mes documents\projet\Exercice3\Debug\exercice3cfg_c.o67"
+"C:\Documents and Settings\utilisateur\Mes documents\projet\Exercice3\exercice3.cmd"
