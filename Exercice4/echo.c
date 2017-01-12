@@ -190,8 +190,7 @@ Void echo(Void)
     // ------------------------------------------
     for (i = 0; i < size; i++)
     {
-        BufInt[(index+i)%(LNGBUF+FE)] = lambda*BufInt[(index + i - k + LNGBUF+FE)%(LNGBUF+FE)] + BufIn[i];
-   
+        BufInt[(index+i)%(LNGBUF+FE)] = lambda*BufInt[(index + i - k + LNGBUF+FE-1)%(LNGBUF+FE)] + BufIn[i];
     	BufOut[i] = un_moins_alpha*BufIn[i] + alpha*BufInt[(index + i - k + LNGBUF+FE)%(LNGBUF+FE)]; // calcul de la sortie du filtre
     }
     index += size;

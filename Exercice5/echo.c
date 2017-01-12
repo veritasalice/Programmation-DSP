@@ -55,27 +55,25 @@ extern PIP_Obj pipTx;
 extern SWI_Obj swiEcho;
 #endif
 
-#define LNGBUF 128  // longueur des buffers
-#define FE 44100
 /*
 *  'pioRx' and 'pioTx' objects will be initialized by PIO_new(). 
 */
 PIO_Obj pioRx, pioTx;
 
+#define LNGBUF 128  // longueur des buffers
+#define FE 44100
+#define RETARD_FIXE 10
+#define RETARD_VARMAX 40
 float BufIn[LNGBUF]; // buffer pour les entrées
-far float BufInt[LNGBUF+FE]; // buffer intermédiaire
+float BufFixe[LNGBUF+RETARD_FIXE*2]; // buffer intermédiaire fixe
+float BufVariable[LNGBUF+RETARD_VARMAX*2]; // buffer intermédiaire variable
 float BufOut[LNGBUF]; // buffer pour la sortie
-int curseur_alpha = 0;
-int curseur_retard = 0;
-int curseur_lambda = 0;
-int prev_curseur_alpha = 0;
-int prev_curseur_retard = 0;
-int prev_curseur_lambda = 0;
-float lambda = 0;
-float un_moins_alpha = 0;
-float alpha = 1.0;
-int k = 0;
-int index = FE;
+int curseur_periode = 10;
+int curseur_amplitude_retard = 0;
+int prev_curseur_periode = 0;
+int prev_curseur_amplitude_retard = 0;
+float alpha = 0.0;
+int k = 0, index_fixe = 0, index_variable = 0;
 
 /*
 *  ======== main ========
@@ -85,9 +83,8 @@ int index = FE;
 */
 main()
 {
-	
     int j;
-    for (j = 0; j < FE+LNGBUF; j++)
+    for (j = 0; j < AMPLITUDE_MAX*2; j++)
     {
         BufInt[j] = 0;
     }
@@ -159,21 +156,13 @@ Void echo(Void)
     PIP_alloc(&pipTx);
     dst = PIP_getWriterAddr(&pipTx);
 
-	if(curseur_alpha != prev_curseur_alpha)
+	if(curseur_periode != prev_curseur_periode)
 	{
-		prev_curseur_alpha = curseur_alpha;
-		alpha = (float)curseur_alpha/10.0;
-		un_moins_alpha = 1.0 - alpha;
+		
 	}
-	if(curseur_lambda != prev_curseur_lambda)
+	if(curseur_amplitude_retard != prev_curseur_amplitude_retard)
 	{
-		prev_curseur_lambda = curseur_lambda;
-		lambda = (float)curseur_lambda/10.0;
-	}
-	if(curseur_retard != prev_curseur_retard)
-	{
-		prev_curseur_retard = curseur_retard;
-		k = (int)(2*FE*curseur_retard*0.1);
+		
 	}
 	
 	
@@ -183,16 +172,20 @@ Void echo(Void)
     for (i = 0; i < size; i++)
     {
         BufIn[i] = (float)*src++ / 32768.0; // normalisation du signal entre -1 et +1
-    }     
+    }  
+        // ------------------------------------------
+    // Signal triangulaire k
+    // ------------------------------------------   
+    
     
     // ------------------------------------------
     // Filtrage
     // ------------------------------------------
     for (i = 0; i < size; i++)
     {
-        BufInt[(index+i)%(LNGBUF+FE)] = lambda*BufInt[(index + i - k + LNGBUF+FE)%(LNGBUF+FE)] + BufIn[i];
-   
-    	BufOut[i] = un_moins_alpha*BufIn[i] + alpha*BufInt[(index + i - k + LNGBUF+FE)%(LNGBUF+FE)]; // calcul de la sortie du filtre
+    	BufFixe[(i+index_fixe)%(LNGBUF + RETARD_FIXE*2)] = BufIn[(i + index_fixe + LNGBUF + RETARD_FIXE)%(LNGBUF + RETARD_FIXE*2)];
+    	BufVariable[(i+index_variable)%(LNGBUF + RETARD_VARMAX*2)] = BufIn[(i + index_variable - k + LNGBUF + RETARD_VARMAX)%(LNGBUF + RETARD_VARMAX*2)];
+    	BufOut[i] =  + alpha*BufInt[(index + i - k + LNGBUF+FE)%(LNGBUF+FE)]; // calcul de la sortie du filtre	un_moins_alpha*
     }
     index += size;
     if (index >= FE+LNGBUF)
@@ -202,12 +195,7 @@ Void echo(Void)
     // copie le buffer de sortie vers la sortie
     for (i = 0; i < size; i++)
     {
-    	if (BufOut[i] > 1.0)
-    		*dst++ = 32767.0;
-    	else if (BufOut[i] < -1.0)
-    		*dst++ = -32768.0;
-    	else
-        	*dst++ = BufOut[i] *32768.0; // reconversion du signal en entier
+    	*dst++ = BufOut[i] *32768.0; // reconversion du signal en entier
     }     
 
     /* Record the amount of actual data being sent */
